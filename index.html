@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Motors — Controle de Manutenção</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <nav>
+    <div class="nav-brand">⚡ Tech Motors</div>
+    <button class="nav-btn active" onclick="showPage('recebimento')">Recebimento</button>
+    <button class="nav-btn" onclick="showPage('mecanica')">Mecânica</button>
+    <button class="nav-btn" onclick="showPage('usinagem')">Usinagem</button>
+    <button class="nav-btn" onclick="showPage('eletrica')">Elétrica</button>
+    <button class="nav-btn" onclick="showPage('painel')">Painel</button>
+  </nav>
+
+  <!-- ===================== RECEBIMENTO ===================== -->
+  <div id="page-recebimento" class="page active">
+    <div class="page-header">
+      <span class="sector-tag tag-recebimento">Recebimento</span>
+      <div class="page-title">Entrada de Motor</div>
+      <div class="page-desc">Registre os dados do cliente e gere a OS de identificação.</div>
+    </div>
+
+    <div id="alert-recebimento"></div>
+
+    <div class="card">
+      <div class="card-title">Dados do Cliente e Motor</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nome do Cliente</label>
+          <input type="text" id="r-nome" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label>Celular</label>
+          <input type="tel" id="r-celular" placeholder="(00) 00000-0000">
+        </div>
+        <div class="form-group">
+          <label>Modelo do Motor</label>
+          <input type="text" id="r-modelo" placeholder="Ex: WEG W22 15cv">
+        </div>
+        <div class="form-group">
+          <label>Número de Série</label>
+          <input type="text" id="r-serie" placeholder="Nº de série do fabricante">
+        </div>
+        <div class="form-group full">
+          <label>Observações de Entrada</label>
+          <textarea id="r-obs" placeholder="Estado aparente, danos visíveis, informações adicionais..."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="registrarOS()">Registrar e Gerar OS</button>
+      </div>
+    </div>
+
+    <div id="os-gerada" style="display:none;">
+      <div class="os-display">
+        <div>
+          <div class="os-label">Ordem de Serviço</div>
+          <div class="os-number" id="os-numero-display"></div>
+          <div class="timestamp" id="os-timestamp"></div>
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="imprimirEtiqueta()">🖨️ Imprimir Etiqueta</button>
+          <button class="btn btn-secondary btn-sm" onclick="novaOS()">+ Nova OS</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">QR Code da OS</div>
+        <div id="qrcode" style="display:flex; justify-content:center; padding: 1rem 0;"></div>
+        <p style="text-align:center; color: var(--muted); font-size:0.8rem; margin-top:0.5rem;">
+          Aponte a câmera para acessar o formulário desta OS
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MECÂNICA ===================== -->
+  <div id="page-mecanica" class="page">
+    <div class="page-header">
+      <span class="sector-tag tag-mecanica">Mecânica</span>
+      <div class="page-title">Inspeção Mecânica</div>
+      <div class="page-desc">Insira o número da OS e preencha os campos de inspeção.</div>
+    </div>
+
+    <div id="alert-mecanica"></div>
+
+    <div class="os-search">
+      <input type="text" id="mecanica-os-input" placeholder="Digite o número da OS (ex: OS-0001)" style="text-transform:uppercase;">
+      <button class="btn btn-secondary" onclick="buscarOS('mecanica')">Buscar</button>
+    </div>
+
+    <div id="mecanica-form" style="display:none;">
+      <div class="os-display" style="margin-bottom:1rem;">
+        <div>
+          <div class="os-label">OS em edição</div>
+          <div class="os-number" id="mecanica-os-display"></div>
+        </div>
+        <div id="mecanica-cliente-info" style="color:var(--muted); font-size:0.85rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Campos de Inspeção</div>
+        <div id="mecanica-fields"></div>
+        <div class="form-group" style="margin-top:1rem;">
+          <label>Observações Gerais — Mecânica</label>
+          <textarea id="mecanica-obs" placeholder="Observações gerais do setor..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="salvarSetor('mecanica')">Salvar Inspeção</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== USINAGEM ===================== -->
+  <div id="page-usinagem" class="page">
+    <div class="page-header">
+      <span class="sector-tag tag-usinagem">Usinagem</span>
+      <div class="page-title">Inspeção do Rotor</div>
+      <div class="page-desc">Insira o número da OS e preencha os campos de inspeção do rotor.</div>
+    </div>
+
+    <div id="alert-usinagem"></div>
+
+    <div class="os-search">
+      <input type="text" id="usinagem-os-input" placeholder="Digite o número da OS (ex: OS-0001)" style="text-transform:uppercase;">
+      <button class="btn btn-secondary" onclick="buscarOS('usinagem')">Buscar</button>
+    </div>
+
+    <div id="usinagem-form" style="display:none;">
+      <div class="os-display" style="margin-bottom:1rem;">
+        <div>
+          <div class="os-label">OS em edição</div>
+          <div class="os-number" id="usinagem-os-display"></div>
+        </div>
+        <div id="usinagem-cliente-info" style="color:var(--muted); font-size:0.85rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Inspeção do Rotor</div>
+        <div id="usinagem-fields"></div>
+        <div class="form-group" style="margin-top:1rem;">
+          <label>Observações Gerais — Usinagem</label>
+          <textarea id="usinagem-obs" placeholder="Observações gerais do setor..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="salvarSetor('usinagem')">Salvar Inspeção</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ELÉTRICA ===================== -->
+  <div id="page-eletrica" class="page">
+    <div class="page-header">
+      <span class="sector-tag tag-eletrica">Elétrica</span>
+      <div class="page-title">Inspeção Elétrica</div>
+      <div class="page-desc">Insira o número da OS e preencha os campos de inspeção elétrica.</div>
+    </div>
+
+    <div id="alert-eletrica"></div>
+
+    <div class="os-search">
+      <input type="text" id="eletrica-os-input" placeholder="Digite o número da OS (ex: OS-0001)" style="text-transform:uppercase;">
+      <button class="btn btn-secondary" onclick="buscarOS('eletrica')">Buscar</button>
+    </div>
+
+    <div id="eletrica-form" style="display:none;">
+      <div class="os-display" style="margin-bottom:1rem;">
+        <div>
+          <div class="os-label">OS em edição</div>
+          <div class="os-number" id="eletrica-os-display"></div>
+        </div>
+        <div id="eletrica-cliente-info" style="color:var(--muted); font-size:0.85rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Inspeção Elétrica</div>
+        <div id="eletrica-fields"></div>
+        <div class="form-group" style="margin-top:1rem;">
+          <label>Observações Gerais — Elétrica</label>
+          <textarea id="eletrica-obs" placeholder="Observações gerais do setor..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="salvarSetor('eletrica')">Salvar Inspeção</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PAINEL ===================== -->
+  <div id="page-painel" class="page">
+    <div class="page-header">
+      <span class="sector-tag tag-painel">Painel</span>
+      <div class="page-title">Acompanhamento em Tempo Real</div>
+      <div class="page-desc">Visão geral de todos os motores e status de cada setor.</div>
+    </div>
+
+    <div class="painel-controls">
+      <input type="text" id="painel-busca" placeholder="Buscar por OS, cliente ou modelo..." oninput="renderPainel()">
+      <button class="btn btn-secondary btn-sm" onclick="renderPainel()">↺ Atualizar</button>
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table id="painel-table">
+          <thead>
+            <tr>
+              <th>OS</th>
+              <th>Cliente</th>
+              <th>Modelo</th>
+              <th>Entrada</th>
+              <th><span class="sector-dot dot-mecanica"></span>Mecânica</th>
+              <th><span class="sector-dot dot-usinagem"></span>Usinagem</th>
+              <th><span class="sector-dot dot-eletrica"></span>Elétrica</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="painel-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL ===================== -->
+  <div class="modal-overlay" id="modal-overlay" onclick="fecharModal(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="fecharModal()">✕ Fechar</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- ===================== IMPRESSÃO ===================== -->
+  <div class="print-area" id="print-area"></div>
+
+  <script src="data.js"></script>
+  <script src="ui.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
